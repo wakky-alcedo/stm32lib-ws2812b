@@ -91,7 +91,8 @@ void WS2812B::send(void){
     uint32_t color;
     uint16_t pwm_data[(24*led_num)+50];
     for (uint8_t i = 0; i < led_num; i++) {
-        color = ((color_rgb[i].green<<16) | (color_rgb[i].red<<8) | (color_rgb[i].blue));
+//        color = ((color_rgb[i].green<<16) | (color_rgb[i].red<<8) | (color_rgb[i].blue)); // そのまま
+        color = ((gamma8[color_rgb[i].green]<<16) | (gamma8[color_rgb[i].red]<<8) | (gamma8[color_rgb[i].blue])); // ガンマ補正あり
         for (int j = 23; j >= 0; j--) {
             if (color&(1<<j)) pwm_data[indx] = bit1;
             else pwm_data[indx] = bit0;
