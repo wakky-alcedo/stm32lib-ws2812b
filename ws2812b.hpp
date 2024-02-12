@@ -55,9 +55,7 @@ private:
     uint8_t datasentflag = 0;
 
 public:
-    WS2812B(TIM_HandleTypeDef *htim,
-            uint32_t channel,
-            uint16_t led_num);
+    WS2812B(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t led_num);
 
     void init();
 

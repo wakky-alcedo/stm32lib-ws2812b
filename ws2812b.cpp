@@ -112,7 +112,7 @@ void WS2812B::send(void){
 }
 
 void WS2812B::run_pulse_finished(){
-    HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Stop_DMA(htim, channel);
     datasentflag = 1;
 }
 
