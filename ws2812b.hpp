@@ -51,8 +51,11 @@ private:
     uint16_t bit1;
 
     std::vector<RGB_t> color_rgb;
+    std::vector<uint16_t> pwm_data;
 
     uint8_t datasentflag = 0;
+
+    static constexpr uint16_t res_frame = 230; // = 280 / 1.25 + 6;
 
 public:
     WS2812B(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t led_num);
@@ -66,7 +69,6 @@ public:
     void set_color_hsv(uint8_t led_id, HSV_t hsv);
     void set_color_hsv(std::vector<HSV_t> hsv);
     void send(void);
-    void run_pulse_finished(void);
 };
 
 } /* namespace ws2812b */

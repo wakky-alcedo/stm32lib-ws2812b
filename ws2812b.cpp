@@ -8,25 +8,19 @@ WS2812B::WS2812B(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t led_num)
       led_num(led_num)
 {
     color_rgb.resize(led_num, RGB_t{0,0,0});
+    pwm_data.resize((24*led_num)+res_frame);
 }
 
 void WS2812B::init() {
     // make 1clk = 1.25µs -> 800kHz
     uint32_t timClkFreq = HAL_RCC_GetPCLK1Freq() * 2;  // timer freq is faster 2times!
-    __HAL_TIM_SET_PRESCALER(htim, 0);  // 0 ~ n-1
+    __HAL_TIM_SET_PRESCALER(htim, 0);
     uint16_t period = timClkFreq / 800000;
     __HAL_TIM_SET_AUTORELOAD(htim, period - 1);
     bit0 = period * 1 / 3.0f;
     bit1 = period * 2 / 3.0f;
 }
 
-/**
- *
- * @param led_id LEDの番号(0 ~ led_num-1)
- * @param red
- * @param green
- * @param blue
- */
 void WS2812B::set_color_rgb(uint8_t led_id, uint8_t red, uint8_t green, uint8_t blue){
     color_rgb[led_id].green = green;
     color_rgb[led_id].red   = red;
@@ -87,9 +81,9 @@ void WS2812B::set_color_hsv(std::vector<HSV_t> hsv){
 }
 
 void WS2812B::send(void){
+    HAL_TIM_PWM_Stop_DMA(htim, channel);
     uint32_t indx = 0;
     uint32_t color;
-    uint16_t pwm_data[(24*led_num)+50];
     for (uint8_t i = 0; i < led_num; i++) {
 //        color = ((color_rgb[i].green<<16) | (color_rgb[i].red<<8) | (color_rgb[i].blue)); // そのまま
         color = ((gamma8[color_rgb[i].green]<<16) | (gamma8[color_rgb[i].red]<<8) | (gamma8[color_rgb[i].blue])); // ガンマ補正あり
@@ -100,20 +94,12 @@ void WS2812B::send(void){
         }
     }
 
-    for (uint8_t i = 0; i < 50; i++) {
+    for (uint8_t i = 0; i < res_frame; i++) {
         pwm_data[indx] = 0;
         indx++;
     }
 
-    HAL_TIM_PWM_Start_DMA(htim, channel, (uint32_t*)pwm_data, indx);
-
-    while(!datasentflag){};
-    datasentflag = 0;
-}
-
-void WS2812B::run_pulse_finished(){
-    HAL_TIM_PWM_Stop_DMA(htim, channel);
-    datasentflag = 1;
+    HAL_TIM_PWM_Start_DMA(htim, channel, (uint32_t*)pwm_data.data(), indx);
 }
 
 } /* namespace ws2812b */
