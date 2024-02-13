@@ -9,18 +9,28 @@
 
 namespace ws2812b {
 
+/**
+ * RGB形式で色を格納する構造体
+ */
 struct RGB_t {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
+    uint8_t red;    //!> 赤の明るさ(0 ~ 255)
+    uint8_t green;  //!> 緑の明るさ(0 ~ 255)
+    uint8_t blue;   //!> 青の明るさ(0 ~ 255)
 };
 
+/**
+ * HSV形式で色を格納する構造体
+ */
 struct HSV_t {
-    float hue; // 色相 (0~360)
-    float sat; // 彩度 (0~100)
-    float val; // 明度 (0~100)
+    float hue; //!> 色相 (0　~　360)
+    float sat; //!> 彩度 (0　~　100)
+    float val; //!> 明度 (0　~　100)
 };
 
+/**
+ * ガンマ補正のための配列
+ * 明るさの値は0 ~ 255しかないので，毎回計算するのではなく，事前に計算したものを保存しておく
+ */
 const uint8_t gamma8[] = { // γ = 2.8くらい
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
@@ -40,22 +50,23 @@ const uint8_t gamma8[] = { // γ = 2.8くらい
   215, 218, 220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252, 255
 };
 
+/**
+ * ws2812bを制御するためのクラス
+ */
 class WS2812B {
 private:
-    TIM_HandleTypeDef *htim;
-    uint32_t channel;
+    TIM_HandleTypeDef *htim;        //!> 使用するタイマ
+    uint32_t channel;               //!> 使用するタイマのチャンネル
 
-    uint16_t led_num; // LEDの個数
+    uint16_t led_num;               //!> LEDの個数
 
-    uint16_t bit0;
-    uint16_t bit1;
+    uint16_t bit0;                  //!> 0を表すbitのときのcompare
+    uint16_t bit1;                  //!> 1を表すbitのときのcompare
 
-    std::vector<RGB_t> color_rgb;
-    std::vector<uint16_t> pwm_data;
+    std::vector<RGB_t> color_rgb;   //!> 色を格納する配列
+    std::vector<uint16_t> pwm_data; //!> PWM出力用のデータを格納する配列
 
-    uint8_t datasentflag = 0;
-
-    static constexpr uint16_t res_frame = 224; // = 280[µs] / 1.25[µs];
+    static constexpr uint16_t res_frame = 224; //!> リセット時間のbit数 = 280[µs] / 1.25[µs];
 
 public:
     WS2812B(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t led_num);
@@ -65,9 +76,11 @@ public:
     void set_color_rgb(uint8_t led_id, uint8_t red, uint8_t green, uint8_t blue);
     void set_color_rgb(uint8_t led_id, RGB_t rgb);
     void set_color_rgb(std::vector<RGB_t> rgb);
+
     void set_color_hsv(uint8_t led_id, float hue, float saturation, float value);
     void set_color_hsv(uint8_t led_id, HSV_t hsv);
     void set_color_hsv(std::vector<HSV_t> hsv);
+
     void send(void);
 };
 
