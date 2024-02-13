@@ -55,7 +55,7 @@ private:
 
     uint8_t datasentflag = 0;
 
-    static constexpr uint16_t res_frame = 230; // = 280 / 1.25 + 6;
+    static constexpr uint16_t res_frame = 224; // = 280[µs] / 1.25[µs];
 
 public:
     WS2812B(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t led_num);
